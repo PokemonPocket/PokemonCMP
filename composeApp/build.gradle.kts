@@ -1,5 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,14 +6,20 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+        tasks
+            .withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>()
+            .configureEach {
+                compilerOptions {
+                    jvmTarget = JvmTarget.JVM_21
+                    languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
+                }
+            }
     }
     
     listOf(
@@ -34,6 +38,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation("com.google.firebase:firebase-common-ktx:23.2.0")
+            implementation("com.google.firebase:firebase-auth-ktx:23.2.0")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -41,6 +47,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
+            implementation(libs.bundles.ktor)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -48,6 +55,8 @@ kotlin {
             implementation(libs.bundles.kmpauth)
             implementation(libs.navigation)
             implementation(libs.napier)
+            implementation(libs.webView)
+            implementation("dev.gitlive:firebase-auth:2.1.0")
         }
     }
 }
@@ -74,8 +83,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 

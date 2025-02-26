@@ -18,6 +18,9 @@ kotlin = "2.1.10"
 kmpauth = "2.3.1"
 napier = "2.7.1"
 navigation = "2.8.0-alpha12"
+ksp = "2.1.10-1.0.29"
+ktorVersion = "3.0.3"
+webView = "1.9.40"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -35,8 +38,15 @@ androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle
 kmpauth-firebase = { group = "io.github.mirzemehdi", name = "kmpauth-firebase", version.ref = "kmpauth" }
 kmpauth-uihelper = { group = "io.github.mirzemehdi", name = "kmpauth-uihelper", version.ref = "kmpauth" }
 kmpauth-google = { group = "io.github.mirzemehdi", name = "kmpauth-google", version.ref = "kmpauth" }
-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation"}
+navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+ktor-client-android = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktorVersion" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktorVersion" }
+ktor-client-ios = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktorVersion" }
+ktor-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktorVersion" }
+ktor-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktorVersion" }
+ktor-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+webView = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version.ref = "webView" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -44,7 +54,10 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [bundles]
 kmpauth = ["kmpauth-firebase", "kmpauth-uihelper", "kmpauth-google"]
+ktor = ["ktor-client-core", "ktor-negotiation", "ktor-serialization", "ktor-logging"]
