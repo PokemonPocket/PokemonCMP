@@ -11,6 +11,9 @@ androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.8.4"
 androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
+firebaseAuth = "2.1.0"
+firebaseAuthKtx = "23.2.0"
+firebaseCommonKtx = "23.2.0"
 google-services = "4.4.2"
 compose-multiplatform = "1.8.0-alpha02"
 junit = "4.13.2"
@@ -23,6 +26,9 @@ ktorVersion = "3.0.3"
 webView = "1.9.40"
 
 [libraries]
+firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseAuth" }
+firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx", version.ref = "firebaseCommonKtx" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

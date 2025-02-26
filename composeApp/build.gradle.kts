@@ -38,8 +38,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation("com.google.firebase:firebase-common-ktx:23.2.0")
-            implementation("com.google.firebase:firebase-auth-ktx:23.2.0")
+            implementation(libs.firebase.common.ktx)
+            implementation(libs.firebase.auth.ktx)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -56,7 +56,7 @@ kotlin {
             implementation(libs.navigation)
             implementation(libs.napier)
             implementation(libs.webView)
-            implementation("dev.gitlive:firebase-auth:2.1.0")
+            implementation(libs.firebase.auth)
         }
     }
 }
