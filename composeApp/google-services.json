@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "304535122874",
+    "project_id": "pokemonpocket",
+    "storage_bucket": "pokemonpocket.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304535122874:android:28270abde1ba5982d62383",
+        "android_client_info": {
+          "package_name": "com.tcgptrading.tcgptrading"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304535122874-qah0elq3qfr57g0s90ldlvkk5d9u5bvo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tcgptrading.tcgptrading",
+            "certificate_hash": "1f455137ba5057a03c0d95a666f60a0890ca463b"
+          }
+        },
+        {
+          "client_id": "304535122874-utm3ap2v4kjvcccg3jirprn8838e2p7d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWn9xL5FzSfB6jCBOmiVTWuSjk-_FpEgg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "304535122874-dlavetui8dbvf1g9c4g81cm5b8ejpvut.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "304535122874-hblkvn6amrhq5toqkq9m1ndhim5d18qd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tcgptrading.tcgptrading"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
