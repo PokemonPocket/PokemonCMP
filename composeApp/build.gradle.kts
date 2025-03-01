@@ -57,6 +57,7 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.webView)
             implementation(libs.firebase.auth)
+            implementation(libs.bundles.koin)
         }
     }
 }

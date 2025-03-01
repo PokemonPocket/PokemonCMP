@@ -13,7 +13,7 @@ androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 firebaseAuth = "2.1.0"
 firebaseAuthKtx = "23.2.0"
-firebaseCommonKtx = "23.2.0"
+firebaseCommonKtx = "21.0.0"
 google-services = "4.4.2"
 compose-multiplatform = "1.8.0-alpha02"
 junit = "4.13.2"
@@ -24,6 +24,7 @@ navigation = "2.8.0-alpha12"
 ksp = "2.1.10-1.0.29"
 ktorVersion = "3.0.3"
 webView = "1.9.40"
+koin = "4.0.2"
 
 [libraries]
 firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseAuth" }
@@ -53,6 +54,7 @@ ktor-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation"
 ktor-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 webView = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version.ref = "webView" }
+koin-compose-viewmodel-nav = {module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koin"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -67,3 +69,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 [bundles]
 kmpauth = ["kmpauth-firebase", "kmpauth-uihelper", "kmpauth-google"]
 ktor = ["ktor-client-core", "ktor-negotiation", "ktor-serialization", "ktor-logging"]
+koin = ["koin-compose-viewmodel-nav"]

@@ -18,5 +18,5 @@ sealed interface Screen {
     data object Splash : Screen
 
     @Serializable
-    data object Home : Screen
+    data object Main : Screen
 }
