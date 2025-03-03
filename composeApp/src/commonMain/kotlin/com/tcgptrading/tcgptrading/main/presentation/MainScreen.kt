@@ -8,17 +8,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.multiplatform.webview.cookie.Cookie
+import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewState
+import com.tcgptrading.tcgptrading.app.presentation.AppIntent
+import com.tcgptrading.tcgptrading.main.domain.LogoutInterfaceHandler
 import io.github.aakira.napier.Napier
 
 @Composable
-fun MainScreen(tokenId: String?) {
+fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
     val state =
         rememberWebViewState("https://tcgp-trading.com").apply {
             webSettings.isJavaScriptEnabled = true
         }
+
+    val jsBridge = rememberWebViewJsBridge()
 
     WebView(
         state = state,
@@ -40,6 +45,10 @@ fun MainScreen(tokenId: String?) {
 
                     Napier.d(message = "cookie: ${state.cookieManager.getCookies("https://tcgp-trading.com")}")
                 }
+            }
+
+            LaunchedEffect(jsBridge) {
+                jsBridge.register(LogoutInterfaceHandler(onAcceptIntent))
             }
         }
 
