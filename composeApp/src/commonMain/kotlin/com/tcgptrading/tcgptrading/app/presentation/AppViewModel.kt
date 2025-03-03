@@ -100,6 +100,10 @@ class AppViewModel(
             is AppIntent.ChangeUserIdToken -> flow {
                 emit(PartialState.LoggedIn)
             }
+
+            AppIntent.LogoutUser -> flow {
+                Firebase.auth.signOut()
+            }
         }
 
     /**

@@ -11,7 +11,7 @@ class LogoutInterfaceHandler(val onAcceptIntent: (AppIntent) -> Unit) : IJsMessa
         navigator: WebViewNavigator?,
         callback: (String) -> Unit
     ) {
-        onAcceptIntent(AppIntent.ChangeUserLogInState(loggedIn = false, token = null))
+        onAcceptIntent(AppIntent.LogoutUser)
     }
 
     override fun methodName(): String = "MobileLogout"

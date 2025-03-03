@@ -53,7 +53,7 @@ fun LoginScreen() {
 
         Spacer(modifier = Modifier.height(PokemonTCGPTheme.dimensions.size05))
 
-        GoogleButtonUiContainerFirebase(linkAccount = false, onResult = { result ->
+        GoogleButtonUiContainerFirebase(linkAccount = true, onResult = { result ->
             Napier.d { result.toString() }
         }) {
             GoogleSignInButton(
@@ -64,7 +64,7 @@ fun LoginScreen() {
 
         Spacer(modifier = Modifier.height(PokemonTCGPTheme.dimensions.size04))
 
-        AppleButtonUiContainer(linkAccount = false, onResult = { result ->
+        AppleButtonUiContainer(linkAccount = true, onResult = { result ->
             Napier.d { result.toString() }
         }) {
             AppleSignInButton(

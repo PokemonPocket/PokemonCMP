@@ -15,6 +15,7 @@ import com.multiplatform.webview.web.rememberWebViewState
 import com.tcgptrading.tcgptrading.app.presentation.AppIntent
 import com.tcgptrading.tcgptrading.main.domain.LogoutInterfaceHandler
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 
 @Composable
 fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
@@ -29,6 +30,7 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
         state = state,
         modifier = Modifier.fillMaxSize(),
         captureBackPresses = true,
+        webViewJsBridge = jsBridge
     )
 
     when (state.loadingState) {
@@ -42,12 +44,11 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
                             value = it,
                         )
                     )
-
-                    Napier.d(message = "cookie: ${state.cookieManager.getCookies("https://tcgp-trading.com")}")
                 }
             }
 
             LaunchedEffect(jsBridge) {
+                delay(1000)
                 jsBridge.register(LogoutInterfaceHandler(onAcceptIntent))
             }
         }

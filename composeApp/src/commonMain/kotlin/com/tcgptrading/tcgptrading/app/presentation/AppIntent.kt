@@ -23,4 +23,5 @@ sealed interface AppIntent {
     data class ShowSnackbar(val snackbarUiModel: SnackbarUiModel) : AppIntent
     data class NavigateToScreen(val route: Screen) : AppIntent
     data class ChangeUserIdToken(val token: String?) : AppIntent
+    data object LogoutUser: AppIntent
 }
