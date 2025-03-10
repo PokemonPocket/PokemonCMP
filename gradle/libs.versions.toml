@@ -25,6 +25,8 @@ ksp = "2.1.10-1.0.29"
 ktorVersion = "3.0.3"
 webView = "1.9.40"
 koin = "4.0.2"
+lexilabs-basic = "0.2.5-beta02"
+google-ads = "22.0.0"
 
 [libraries]
 firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseAuth" }
@@ -52,9 +54,11 @@ ktor-client-ios = { group = "io.ktor", name = "ktor-client-darwin", version.ref 
 ktor-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktorVersion" }
 ktor-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktorVersion" }
 ktor-serialization = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
 webView = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version.ref = "webView" }
-koin-compose-viewmodel-nav = {module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koin"}
+koin-compose-viewmodel-nav = { group = "io.insert-koin", name = "koin-compose-viewmodel-navigation", version.ref = "koin" }
+google-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "google-ads" }
+lexilabs-basic-ads = { group = "app.lexilabs.basic", name = "basic-ads", version.ref = "lexilabs-basic" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

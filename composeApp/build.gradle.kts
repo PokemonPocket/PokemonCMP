@@ -59,6 +59,8 @@ kotlin {
             implementation(libs.webView)
             implementation(libs.firebase.auth)
             implementation(libs.bundles.koin)
+            implementation(libs.lexilabs.basic.ads)
+            implementation(libs.google.ads)
         }
     }
 }

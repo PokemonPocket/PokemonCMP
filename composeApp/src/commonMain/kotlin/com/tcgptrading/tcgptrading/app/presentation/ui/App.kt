@@ -12,10 +12,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import app.lexilabs.basic.ads.BasicAds
+import app.lexilabs.basic.ads.DependsOnGoogleMobileAds
 import com.tcgptrading.tcgptrading.app.presentation.AppViewModel
 import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.tcgptrading.tcgptrading.core.presentation.theme.PokemonTCGPTheme
+import com.tcgptrading.tcgptrading.localContext
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -37,6 +40,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * Note: Optimization features such as 'remember' and 'collectAsStateWithLifecycle' are used throughout,
  * significantly improving performance for the application.
  */
+@OptIn(DependsOnGoogleMobileAds::class)
 @Composable
 fun App() {
     KoinContext {
@@ -50,6 +54,8 @@ fun App() {
                     val state by appViewModel.uiState.collectAsStateWithLifecycle()
                     val navController: NavHostController = rememberNavController()
 
+
+                    BasicAds.initialize(localContext())
                     LaunchedEffect(appViewModel) {
                         GoogleAuthProvider.create(credentials = GoogleAuthCredentials(serverId = "304535122874-utm3ap2v4kjvcccg3jirprn8838e2p7d.apps.googleusercontent.com"))
                     }
