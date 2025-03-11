@@ -27,3 +27,4 @@ captures
 /.kotlin/
 
 .editorconfig
+**/release/
