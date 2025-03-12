@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.lexilabs.basic.ads.AdSize
 import app.lexilabs.basic.ads.BannerAd
 import app.lexilabs.basic.ads.DependsOnGoogleMobileAds
 import com.multiplatform.webview.cookie.Cookie
@@ -30,7 +31,7 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
 
     val jsBridge = rememberWebViewJsBridge()
     Column(modifier = Modifier.fillMaxSize()) {
-        BannerAd(adUnitId = adBannerId)
+        BannerAd(adUnitId = adBannerId, adSize = AdSize(width = AdSize.FULL_WIDTH, height = AdSize.AUTO_HEIGHT))
 
         WebView(
             state = state,

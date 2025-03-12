@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.lexilabs.basic.ads.AdSize
 import app.lexilabs.basic.ads.BannerAd
 import app.lexilabs.basic.ads.DependsOnGoogleMobileAds
 import com.mmk.kmpauth.firebase.apple.AppleButtonUiContainer
@@ -40,7 +41,10 @@ fun LoginScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        BannerAd(adUnitId = adBannerId)
+        BannerAd(
+            adUnitId = adBannerId,
+            adSize = AdSize(width = AdSize.FULL_WIDTH, height = AdSize.AUTO_HEIGHT)
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -87,9 +91,6 @@ fun LoginScreen() {
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        BannerAd(adUnitId = adBannerId)
-
     }
 }
 
