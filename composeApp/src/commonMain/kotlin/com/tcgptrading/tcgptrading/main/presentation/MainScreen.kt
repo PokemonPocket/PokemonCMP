@@ -55,6 +55,13 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
                         )
                     )
                 }
+                state.cookieManager.setCookie(
+                    "https://tcgp-trading.com", Cookie(
+                        name = "tcgpmobile",
+                        domain = "tcgp-trading.com",
+                        value = "tcgpmobile",
+                    )
+                )
             }
 
             LaunchedEffect(jsBridge) {
