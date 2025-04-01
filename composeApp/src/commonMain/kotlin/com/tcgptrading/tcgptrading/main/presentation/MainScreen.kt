@@ -31,7 +31,7 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit, tokenId: String?) {
 
     val jsBridge = rememberWebViewJsBridge()
     Column(modifier = Modifier.fillMaxSize()) {
-        BannerAd(adUnitId = adBannerId, adSize = AdSize(width = AdSize.FULL_WIDTH, height = AdSize.AUTO_HEIGHT))
+        BannerAd(adUnitId = adBannerId, adSize = AdSize.FULL_BANNER)
 
         WebView(
             state = state,

@@ -43,7 +43,7 @@ fun LoginScreen() {
     ) {
         BannerAd(
             adUnitId = adBannerId,
-            adSize = AdSize(width = AdSize.FULL_WIDTH, height = AdSize.AUTO_HEIGHT)
+            adSize = AdSize.FULL_BANNER
         )
 
         Spacer(modifier = Modifier.weight(1f))
