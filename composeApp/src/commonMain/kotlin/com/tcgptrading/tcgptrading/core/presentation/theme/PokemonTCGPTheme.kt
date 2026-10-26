@@ -1,18 +1,19 @@
 package com.tcgptrading.tcgptrading.core.presentation.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-
 
 object PokemonTCGPTheme {
     val dimensions
@@ -21,97 +22,75 @@ object PokemonTCGPTheme {
         get() = LocalDimensions.current
 }
 
+/**
+ * The app theme. Light only, like the website: the palette is built around the cards,
+ * and the card art reads best on the pale ground.
+ */
 @Composable
-fun PokemonTCGPTheme(
-    isSystemInDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun PokemonTCGPTheme(content: @Composable () -> Unit) {
+    val body = lexendFontFamily
+    val display = bricolageFontFamily
 
-    val colorScheme = if (isSystemInDarkTheme) DarkColors else LightColors
+    val typography = Typography(
+        // Page titles ("Wanted cards")
+        headlineLarge = TextStyle(fontFamily = display, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, lineHeight = 36.sp, letterSpacing = (-0.03).em),
+        headlineMedium = TextStyle(fontFamily = display, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 31.sp, letterSpacing = (-0.02).em),
+        headlineSmall = TextStyle(fontFamily = display, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, lineHeight = 28.sp, letterSpacing = (-0.02).em),
+        // Section titles and card names
+        titleLarge = TextStyle(fontFamily = display, fontWeight = FontWeight.Bold, fontSize = 21.sp, lineHeight = 26.sp, letterSpacing = (-0.01).em),
+        titleMedium = TextStyle(fontFamily = display, fontWeight = FontWeight.Bold, fontSize = 17.sp, lineHeight = 22.sp),
+        titleSmall = TextStyle(fontFamily = body, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
+        bodyLarge = TextStyle(fontFamily = body, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp),
+        bodyMedium = TextStyle(fontFamily = body, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp),
+        bodySmall = TextStyle(fontFamily = body, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp),
+        labelLarge = TextStyle(fontFamily = body, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, lineHeight = 20.sp),
+        labelMedium = TextStyle(fontFamily = body, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 16.sp),
+        labelSmall = TextStyle(fontFamily = body, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 14.sp),
+    )
 
-
-    CompositionLocalProvider(
-        LocalDimensions provides Dimensions(),
-        // LocalElevation provides Elevation(),
-    ) {
+    CompositionLocalProvider(LocalDimensions provides Dimensions()) {
         MaterialTheme(
-            colorScheme = colorScheme,
-            content = content,
-            typography = Typography(
-                titleMedium = TextStyle(
-                    fontSize = 18.sp
-                ),
+            colorScheme = TcgColorScheme,
+            typography = typography,
+            shapes = Shapes(
+                extraSmall = RoundedCornerShape(8.dp),
+                small = RoundedCornerShape(12.dp),
+                medium = RoundedCornerShape(14.dp),
+                large = RoundedCornerShape(20.dp),
+                extraLarge = RoundedCornerShape(24.dp),
             ),
-            shapes = Shapes()
+            content = content,
         )
     }
 }
 
 private val LocalDimensions = staticCompositionLocalOf { Dimensions() }
-//private val LocalElevation = staticCompositionLocalOf { Elevation() }
 
-
-private val LightColors = lightColorScheme(
-    primary = md_theme_light_primary,
-    onPrimary = md_theme_light_onPrimary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    onSecondary = md_theme_light_onSecondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    onTertiary = md_theme_light_onTertiary,
-    tertiaryContainer = md_theme_light_tertiaryContainer,
-    onTertiaryContainer = md_theme_light_onTertiaryContainer,
-    error = md_theme_light_error,
-    onError = md_theme_light_onError,
-    errorContainer = md_theme_light_errorContainer,
-    onErrorContainer = md_theme_light_onErrorContainer,
-    outline = md_theme_light_outline,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    inverseSurface = md_theme_light_inverseSurface,
-    inverseOnSurface = md_theme_light_inverseOnSurface,
-    inversePrimary = md_theme_light_inversePrimary,
-    surfaceTint = md_theme_light_surfaceTint,
-    outlineVariant = md_theme_light_outlineVariant,
-    scrim = md_theme_light_scrim,
-)
-
-
-private val DarkColors = darkColorScheme(
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-    secondary = md_theme_dark_secondary,
-    onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = md_theme_dark_secondaryContainer,
-    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
-    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-    error = md_theme_dark_error,
-    onError = md_theme_dark_onError,
-    errorContainer = md_theme_dark_errorContainer,
-    onErrorContainer = md_theme_dark_onErrorContainer,
-    outline = md_theme_dark_outline,
-    background = md_theme_dark_background,
-    onBackground = md_theme_dark_onBackground,
-    surface = md_theme_dark_surface,
-    onSurface = md_theme_dark_onSurface,
-    surfaceVariant = md_theme_dark_surfaceVariant,
-    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    inverseSurface = md_theme_dark_inverseSurface,
-    inverseOnSurface = md_theme_dark_inverseOnSurface,
-    inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = md_theme_dark_surfaceTint,
-    outlineVariant = md_theme_dark_outlineVariant,
-    scrim = md_theme_dark_scrim,
+private val TcgColorScheme = lightColorScheme(
+    primary = TcgColors.Red,
+    onPrimary = TcgColors.Surface,
+    primaryContainer = TcgColors.RedSoft,
+    onPrimaryContainer = TcgColors.RedInk,
+    secondary = TcgColors.Ink,
+    onSecondary = TcgColors.Surface,
+    secondaryContainer = TcgColors.Chip,
+    onSecondaryContainer = TcgColors.Ink,
+    tertiary = TcgColors.Diamond,
+    onTertiary = TcgColors.Surface,
+    background = TcgColors.Ground,
+    onBackground = TcgColors.Ink,
+    surface = TcgColors.Surface,
+    onSurface = TcgColors.Ink,
+    surfaceVariant = TcgColors.Soft,
+    onSurfaceVariant = TcgColors.Muted,
+    surfaceContainer = TcgColors.Surface,
+    surfaceContainerLow = TcgColors.Soft,
+    surfaceContainerHigh = TcgColors.Surface,
+    outline = TcgColors.Line,
+    outlineVariant = TcgColors.LineSoft,
+    error = TcgColors.RedInk,
+    onError = TcgColors.Surface,
+    errorContainer = TcgColors.RedTag,
+    onErrorContainer = TcgColors.RedInk,
+    scrim = TcgColors.Ink,
 )

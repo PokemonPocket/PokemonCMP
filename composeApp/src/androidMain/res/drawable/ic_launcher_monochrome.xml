@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon (Android 13+): one colour, so the front card is an outline and only the visible part of the back card is filled -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.92"
+        android:scaleY="1.92"
+        android:translateX="25.2"
+        android:translateY="25.2">
+        <path
+            android:fillColor="#000000"
+            android:pathData="M6,5 H9 V27 H6 A3,3 0 0 1 3,24 V8 A3,3 0 0 1 6,5 Z" />
+        <path
+            android:strokeColor="#000000"
+            android:strokeWidth="2"
+            android:pathData="M14,3 H24 A3,3 0 0 1 27,6 V22 A3,3 0 0 1 24,25 H14 A3,3 0 0 1 11,22 V6 A3,3 0 0 1 14,3 Z" />
+        <path
+            android:strokeColor="#000000"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:pathData="M15,14 L23,14 M19,10 L19,18" />
+    </group>
+</vector>

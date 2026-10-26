@@ -39,6 +39,6 @@ fun AppNavHost(
     ) {
         provideSplashScene(onAcceptIntent = appViewModel::acceptIntent)
         provideLoginScene(onAcceptIntent = appViewModel::acceptIntent)
-        provideMainScene(onAcceptIntent = appViewModel::acceptIntent, tokenId = state.tokenId)
+        provideMainScene(onAcceptIntent = appViewModel::acceptIntent)
     }
 }

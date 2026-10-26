@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.firebase.common.ktx)
             implementation(libs.firebase.auth.ktx)
+            implementation(libs.ktor.client.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -56,11 +57,19 @@ kotlin {
             implementation(libs.bundles.kmpauth)
             implementation(libs.navigation)
             implementation(libs.napier)
-            implementation(libs.webView)
             implementation(libs.firebase.auth)
             implementation(libs.bundles.koin)
             implementation(libs.lexilabs.basic.ads)
             implementation(libs.google.ads)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
+            implementation(libs.krossbow.stomp)
+            implementation(libs.krossbow.ktor)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.multiplatform.settings)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.ios)
         }
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TCGP Trading mark (same shapes as the website navbar SVG, 30x30 units), centred in the 66dp safe zone -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.92"
+        android:scaleY="1.92"
+        android:translateX="25.2"
+        android:translateY="25.2">
+        <!-- Back card -->
+        <path
+            android:fillColor="#C8302E"
+            android:pathData="M6,5 H16 A3,3 0 0 1 19,8 V24 A3,3 0 0 1 16,27 H6 A3,3 0 0 1 3,24 V8 A3,3 0 0 1 6,5 Z" />
+        <!-- Front card -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:strokeColor="#15233F"
+            android:strokeWidth="2"
+            android:pathData="M14,3 H24 A3,3 0 0 1 27,6 V22 A3,3 0 0 1 24,25 H14 A3,3 0 0 1 11,22 V6 A3,3 0 0 1 14,3 Z" />
+        <!-- Plus -->
+        <path
+            android:strokeColor="#15233F"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:pathData="M15,14 L23,14 M19,10 L19,18" />
+    </group>
+</vector>

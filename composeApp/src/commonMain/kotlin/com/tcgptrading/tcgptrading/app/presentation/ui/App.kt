@@ -9,75 +9,66 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import app.lexilabs.basic.ads.BasicAds
 import app.lexilabs.basic.ads.DependsOnGoogleMobileAds
-import com.tcgptrading.tcgptrading.app.presentation.AppViewModel
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
 import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
+import com.tcgptrading.tcgptrading.app.presentation.AppViewModel
+import com.tcgptrading.tcgptrading.core.data.network.AuthConfig
 import com.tcgptrading.tcgptrading.core.presentation.theme.PokemonTCGPTheme
+import com.tcgptrading.tcgptrading.core.presentation.theme.TcgColors
 import com.tcgptrading.tcgptrading.localContext
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * The `App` function is the main composable within the application.
- * It is annotated with `OptIn` and `Composable` indicating that experimental APIs are used and that it is a piece of UI.
- *
- * Functionality:
- *     - It initializes the application within `PreComposeApp`.
- *     - It includes functionality of the InfoTraffic Theme, which is defined within `InfoTrafficTheme`.
- *     - It initializes various application elements like SnackbarHostState, Navigator and AppViewModel.
- *     - Utilizes the `AppEffect` function which takes AppViewModel, SnackbarHostState, and Navigator as parameters,
- *       and facilitates side effects within the app.
- *     - Determines the current route for the navigation flow.
- *     - Defines the visual design and behavior of major sections of the application,
- *       such as the bottom navigation, Snackbar, and FloatingActionButton via `Scaffold`.
- *     - Defines the navigation host for the application via `AppNavHost`, responsible for switching destinations.
- *
- * Note: Optimization features such as 'remember' and 'collectAsStateWithLifecycle' are used throughout,
- * significantly improving performance for the application.
+ * Root of the app: theme, image loading, ads and Google sign-in setup,
+ * then splash → sign-in → the tabbed app depending on the Firebase session.
  */
 @OptIn(DependsOnGoogleMobileAds::class)
 @Composable
 fun App() {
     KoinContext {
         PokemonTCGPTheme {
-            val rootNavController: NavHostController = rememberNavController()
-            NavHost(navController = rootNavController, startDestination = "ROOT") {
-                composable(route = "ROOT") {
+            // Card art: cached in memory and on disk, so images load once and come back instantly
+            setSingletonImageLoaderFactory { context ->
+                ImageLoader.Builder(context)
+                    .components { add(KtorNetworkFetcherFactory()) }
+                    .crossfade(true)
+                    .build()
+            }
 
-                    val snackbarHostState = remember { SnackbarHostState() }
-                    val appViewModel = koinViewModel<AppViewModel>()
-                    val state by appViewModel.uiState.collectAsStateWithLifecycle()
-                    val navController: NavHostController = rememberNavController()
+            val snackbarHostState = remember { SnackbarHostState() }
+            val appViewModel = koinViewModel<AppViewModel>()
+            val state by appViewModel.uiState.collectAsStateWithLifecycle()
+            val navController: NavHostController = rememberNavController()
 
+            BasicAds.initialize(localContext())
+            LaunchedEffect(appViewModel) {
+                GoogleAuthProvider.create(credentials = GoogleAuthCredentials(serverId = AuthConfig.GOOGLE_WEB_CLIENT_ID))
+            }
 
-                    BasicAds.initialize(localContext())
-                    LaunchedEffect(appViewModel) {
-                        GoogleAuthProvider.create(credentials = GoogleAuthCredentials(serverId = "304535122874-utm3ap2v4kjvcccg3jirprn8838e2p7d.apps.googleusercontent.com"))
-                    }
+            AppEffect(
+                appViewModel = appViewModel,
+                snackbarHostState = snackbarHostState,
+                navController = navController,
+            )
 
-                    AppEffect(
-                        appViewModel = appViewModel,
-                        snackbarHostState = snackbarHostState,
-                        navController = navController,
-                    )
-
-                    Scaffold(
-                        snackbarHost = { SnackbarHost(snackbarHostState) },
-                    ) { paddingValues ->
-                        AppNavHost(
-                            navController = navController,
-                            appViewModel = appViewModel,
-                            paddingValues = paddingValues,
-                            state = state
-                        )
-
-                    }
-                }
+            Scaffold(
+                containerColor = TcgColors.Ground,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+            ) { paddingValues ->
+                AppNavHost(
+                    navController = navController,
+                    appViewModel = appViewModel,
+                    paddingValues = paddingValues,
+                    state = state,
+                )
             }
         }
     }
