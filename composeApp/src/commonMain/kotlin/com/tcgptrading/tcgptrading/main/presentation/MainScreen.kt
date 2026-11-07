@@ -21,8 +21,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -68,6 +70,7 @@ import com.tcgptrading.tcgptrading.features.account.TutorialDialog
 import com.tcgptrading.tcgptrading.features.chat.ChatListScreen
 import com.tcgptrading.tcgptrading.features.chat.ConversationScreen
 import com.tcgptrading.tcgptrading.features.trading.MakeOfferScreen
+import com.tcgptrading.tcgptrading.features.trading.TradingSignals
 import com.tcgptrading.tcgptrading.features.trading.WantedScreen
 import com.tcgptrading.tcgptrading.features.collection.CollectionScreen
 import com.tcgptrading.tcgptrading.features.trading.WantedSearchRequests
@@ -141,6 +144,23 @@ fun MainScreen(onAcceptIntent: (AppIntent) -> Unit) {
         }
         refresh()
         chatSocket.messages.collect { refresh() }
+    }
+
+    // Trading messages ("Offer sent to Player 1234") live here, so switching tabs or leaving a screen never drops one
+    val tradingSignals = koinInject<TradingSignals>()
+    LaunchedEffect(tradingSignals) {
+        tradingSignals.notices.collect { notice ->
+            // A newer message replaces the one showing; showSnackbar waits, so each runs on its own
+            snackbar.currentSnackbarData?.dismiss()
+            launch {
+                val result = snackbar.showSnackbar(
+                    message = notice.text,
+                    actionLabel = if (notice.seeOffers) "See your offers" else null,
+                    duration = if (notice.seeOffers) SnackbarDuration.Long else SnackbarDuration.Short,
+                )
+                if (result == SnackbarResult.ActionPerformed) navController.navigateToTab(Tab.MyTrades(tab = "offers"))
+            }
+        }
     }
 
     val backStack by navController.currentBackStackEntryAsState()
@@ -246,10 +266,9 @@ private fun MainNavHost(navController: NavHostController, onSignedOut: () -> Uni
     NavHost(navController = navController, startDestination = Tab.Wanted) {
         composable<Tab.Wanted> {
             WantedScreen(
-                onOffer = { request ->
-                    navController.navigate(Detail.MakeOffer(request.requestId, request.cardId, request.userFriendId.orEmpty()))
-                },
+                onOffer = { offer -> navController.navigate(offer) },
                 onAddWants = { navController.navigateToTab(Tab.Collection) },
+                onSeeOffers = { navController.navigateToTab(Tab.MyTrades(tab = "offers")) },
             )
         }
         composable<Tab.Collection> {

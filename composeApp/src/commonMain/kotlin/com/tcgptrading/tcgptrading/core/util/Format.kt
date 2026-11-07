@@ -47,6 +47,16 @@ val EXPANSIONS = linkedMapOf(
     "A4a" to "Secluded Springs",
     "A4b" to "Deluxe Pack ex",
     "B1" to "Mega Rising",
+    "B1a" to "Crimson Blaze",
+    "B2" to "Fantastical Parade",
+    "B2a" to "Paldean Wonders",
+    "B2b" to "Mega Shine",
+    "B3" to "Pulsing Aura",
+    "B3a" to "Paradox Drive",
+    "B3b" to "Everyday Wonders",
+    "B4" to "Ruler of the Skies",
+    "B4a" to "Team Rocket’s Ambition",
+    "B4b" to "Deluxe Pack: Mega",
 )
 
 /** Promo sets: shown in the collection, but not a filter on wants (the backend spells them PROMO_A there). */
@@ -62,10 +72,14 @@ val LANGUAGES = listOf("English", "Italian", "French", "German", "Brazilian", "S
 /**
  * Card images are stored as Google Drive share links. Their copies on Cloudflare Pages are named by the
  * Drive file id (Drive rate-limits image traffic), so the link maps straight to the copy.
+ * Newer cards store the Cloudflare URL itself (…/l/<cardId>.webp); only the size is swapped.
  * large = 600px wide; otherwise 360px, enough for every card size in the app.
  */
 fun directImageUrl(url: String?, large: Boolean = false): String? {
     if (url.isNullOrBlank()) return null
+    if (url.startsWith("${ApiConfig.CARD_IMAGES_URL}/")) {
+        return url.replace(Regex("/[sl]/(?=[^/]+$)"), "/${if (large) "l" else "s"}/")
+    }
     val id = Regex("/d/([a-zA-Z0-9_-]{10,})/?").find(url)?.groupValues?.get(1)
     return if (id != null) "${ApiConfig.CARD_IMAGES_URL}/${if (large) "l" else "s"}/$id.webp" else url
 }

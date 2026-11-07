@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,7 @@ import com.tcgptrading.tcgptrading.core.util.rarityOf
 import com.tcgptrading.tcgptrading.main.presentation.LocalFriendIdGate
 import com.tcgptrading.tcgptrading.main.presentation.LocalSnackbar
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -87,11 +89,13 @@ fun MakeOfferScreen(route: Detail.MakeOffer, onBack: () -> Unit, onSent: () -> U
     val snackbar = LocalSnackbar.current
     val gate = LocalFriendIdGate.current
     val gridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
-                is MakeOfferEvent.Message -> snackbar.showSnackbar(event.text)
+                // showSnackbar waits until the message is gone, so it runs apart from the events
+                is MakeOfferEvent.Message -> scope.launch { snackbar.showSnackbar(event.text) }
                 MakeOfferEvent.Sent -> onSent()
             }
         }
@@ -298,6 +302,7 @@ private fun OfferSummaryBar(picked: List<Card>, sending: Boolean, onSend: () -> 
                         onClick = onSend,
                         enabled = picked.isNotEmpty(),
                         loading = sending,
+                        loadingText = "Sending…",
                         modifier = Modifier.weight(2f),
                     )
                 }

@@ -31,8 +31,16 @@ sealed interface Tab {
 /** Screens opened on top of a tab (they hide the tab bar and the ad). */
 @Serializable
 sealed interface Detail {
-    /** Offer a trade on someone's want: you give the wanted card and pick what you'd like back. */
-    @Serializable data class MakeOffer(val requestId: String, val cardId: String, val requesterFriendId: String) : Detail
+    /**
+     * Offer a trade on someone's want: you give the wanted card and pick what you'd like back.
+     * want: cards to start picked, comma separated (from Wanted › For you / Traders), at most 5.
+     */
+    @Serializable data class MakeOffer(
+        val requestId: String,
+        val cardId: String,
+        val requesterFriendId: String,
+        val want: String? = null,
+    ) : Detail
     /** Offers other players made on one of my wants. */
     @Serializable data class ReviewOffers(val requestId: String, val cardId: String) : Detail
     @Serializable data class Conversation(val email: String) : Detail

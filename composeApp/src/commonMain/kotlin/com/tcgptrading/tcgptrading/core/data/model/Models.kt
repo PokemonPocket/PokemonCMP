@@ -190,3 +190,141 @@ data class SpareMatch(
 
 @Serializable
 data class SpareMatches(val totalSparesWanted: Long = 0, val cards: List<SpareMatch> = emptyList())
+
+// ---------- Wanted tabs (/wanted) — every list is newest first ----------
+
+/** A card as the Wanted tabs send it. rarityName is the long name ("Double Rare"). */
+@Serializable
+data class WantedCard(
+    val cardId: String,
+    val aliasId: String? = null,
+    val name: String = "",
+    val illustrationUrl: String? = null,
+    val rarityName: String? = null,
+)
+
+/** Wants of one player from one day. total can be larger than requests: only the first ones come. */
+@Serializable
+data class FeedGroup(
+    val userFriendId: String? = null,
+    val latest: String? = null,
+    val total: Int = 0,
+    val requests: List<TradeRequest> = emptyList(),
+)
+
+@Serializable
+data class FeedPage(
+    val content: List<FeedGroup> = emptyList(),
+    val totalRequests: Long = 0,
+    val totalGroups: Long = 0,
+    val page: Int = 0,
+    val totalPages: Int = 0,
+)
+
+/** One card and how many players want it. rarity is the short code (RR). */
+@Serializable
+data class CardDemand(
+    val cardId: String,
+    val cardName: String = "",
+    val rarity: String? = null,
+    val expansion: String? = null,
+    val imageUrl: String? = null,
+    val wantedBy: Long = 0,
+    val latest: String? = null,
+)
+
+@Serializable
+data class CardDemandPage(
+    val content: List<CardDemand> = emptyList(),
+    val totalElements: Long = 0,
+    val page: Int = 0,
+    val totalPages: Int = 0,
+)
+
+/** They want give (my spare) and have get spare, which I'm missing. */
+@Serializable
+data class WantedSwap(
+    val request: TradeRequest,
+    val give: WantedCard,
+    val get: WantedCard,
+    val mySpares: Int = 0,
+    val moreWithTrader: Int = 0,
+    val traderActiveAt: String? = null,
+)
+
+/** They want a spare of mine, with nothing I'm missing to give back in that rarity. */
+@Serializable
+data class WantedHelp(
+    val request: TradeRequest,
+    val give: WantedCard,
+    val mySpares: Int = 0,
+    val wantedBy: Long = 0,
+)
+
+@Serializable
+data class ForYou(
+    val hasCollection: Boolean = false,
+    val spareCards: Int = 0,
+    val swaps: List<WantedSwap> = emptyList(),
+    val help: List<WantedHelp> = emptyList(),
+)
+
+/** A card to ask for back. reason: THEIR_SPARE (they have it spare), YOUR_WANT (on my wants) or MISSING (I don't own it). */
+@Serializable
+data class WantedSuggest(val card: WantedCard, val reason: String = "MISSING")
+
+/**
+ * One want of a trader that I can fill. get: a card they have spare that I'm missing, or null.
+ * suggest: up to 5 cards of the same rarity I don't own, best first.
+ */
+@Serializable
+data class TradeLine(
+    val requestId: String,
+    val give: WantedCard,
+    val get: WantedCard? = null,
+    val mySpares: Int = 0,
+    /** Null when the server is older than suggestions. */
+    val suggest: List<WantedSuggest>? = null,
+)
+
+@Serializable
+data class WantedTrader(
+    val userFriendId: String,
+    val latestWant: String? = null,
+    val activeAt: String? = null,
+    val openWants: Long = 0,
+    /** How many of their wants I can fill (2 or more). */
+    val trades: Int = 0,
+    /** How many of those they can pay back with a card I'm missing. */
+    val swaps: Int = 0,
+    /** Their completed trades on the site. */
+    val tradesDone: Long = 0,
+    val give: List<TradeLine> = emptyList(),
+    val get: List<WantedCard> = emptyList(),
+)
+
+@Serializable
+data class WantedTraders(
+    val hasCollection: Boolean = false,
+    val spareCards: Int = 0,
+    /** When I last changed my collection: every match is read from it. */
+    val collectionUpdatedAt: String? = null,
+    val traders: List<WantedTrader> = emptyList(),
+)
+
+/** Who wants one card right now (newest first), from the card page endpoint. */
+@Serializable
+data class CardWant(
+    val requestId: String,
+    val cardId: String = "",
+    val userFriendId: String? = null,
+    val language: String? = null,
+    val offerCount: Int? = null,
+    val message: String? = null,
+    val creationDate: String? = null,
+    /** A card of the same rarity this player has spare and I'm missing. */
+    val canGive: String? = null,
+)
+
+@Serializable
+data class CardMarket(val cardId: String = "", val wantedCount: Long = 0, val wants: List<CardWant> = emptyList())

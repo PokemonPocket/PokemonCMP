@@ -7,9 +7,14 @@ import com.tcgptrading.tcgptrading.core.data.Session
 import com.tcgptrading.tcgptrading.core.data.TradingApi
 import com.tcgptrading.tcgptrading.core.data.model.Card
 import com.tcgptrading.tcgptrading.core.data.model.OfferCreate
+import com.tcgptrading.tcgptrading.core.data.isConflict
 import com.tcgptrading.tcgptrading.core.data.runApi
+import com.tcgptrading.tcgptrading.core.data.serverMessage
+import com.tcgptrading.tcgptrading.core.util.playerLabel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +63,7 @@ class MakeOfferViewModel(
     private val route: Detail.MakeOffer,
     private val api: TradingApi,
     private val session: Session,
+    private val signals: TradingSignals,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MakeOfferState())
@@ -86,8 +92,27 @@ class MakeOfferViewModel(
                 .onSuccess { card ->
                     _state.update { it.copy(wanted = card, wantedLoading = false) }
                     loadCards(reset = true)
+                    preselectWant(card)
                 }
                 .onFailure { e -> _state.update { it.copy(wantedLoading = false, wantedError = e.message) } }
+        }
+    }
+
+    /** From Wanted › For you / Traders: the suggested cards start picked, in order (same rarity only, like any pick). */
+    private fun preselectWant(wanted: Card) {
+        val wantIds = route.want.orEmpty().split(',').map { it.trim() }
+            .filter { it.isNotEmpty() && it != wanted.cardId }.distinct().take(MAX_PICKS)
+        if (wantIds.isEmpty()) return
+        viewModelScope.launch {
+            val cards = wantIds.map { id -> async { runApi { api.card(id) }.getOrNull() } }.awaitAll()
+            val rarity = wanted.rarityName ?: wanted.rarity
+            // A card that failed to load or has another rarity is left out, and the player is told
+            val usable = cards.filterNotNull().filter { (it.rarityName ?: it.rarity) == rarity }
+            _state.update { s ->
+                val add = usable.filter { s.picked.none { p -> p.cardId == it.cardId } }
+                s.copy(picked = (s.picked + add).take(MAX_PICKS))
+            }
+            if (usable.size < wantIds.size) _events.send(MakeOfferEvent.Message("Some suggested cards couldn't be added."))
         }
     }
 
@@ -119,7 +144,7 @@ class MakeOfferViewModel(
                     val content = result.content.filter { it.cardId != wanted.cardId }
                     _state.update {
                         it.copy(
-                            cards = if (reset) content else it.cards + content,
+                            cards = (if (reset) content else it.cards + content).distinctBy { c -> c.cardId },
                             page = page,
                             totalPages = result.page.totalPages,
                             loading = false, loadingMore = false,
@@ -169,12 +194,15 @@ class MakeOfferViewModel(
                     )
                 )
             }.onSuccess {
-                _state.update { it.copy(sending = false) }
-                _events.send(MakeOfferEvent.Message("Offer sent"))
+                // Stays "sending" so Send can't go out twice while the screen closes;
+                // the message is shown by the app (MainScreen), not this screen, so closing doesn't wait for it
+                signals.offerSent()
+                signals.notify(TradeNotice("Offer sent to ${playerLabel(route.requesterFriendId)}."))
                 _events.send(MakeOfferEvent.Sent)
             }.onFailure { e ->
                 _state.update { it.copy(sending = false) }
-                _events.send(MakeOfferEvent.Message(e.message ?: "Could not send the offer. Try again."))
+                val text = if (e.isConflict()) e.serverMessage ?: ALREADY_OFFERED else e.message ?: "Could not send the offer. Try again."
+                _events.send(MakeOfferEvent.Message(text))
             }
         }
     }

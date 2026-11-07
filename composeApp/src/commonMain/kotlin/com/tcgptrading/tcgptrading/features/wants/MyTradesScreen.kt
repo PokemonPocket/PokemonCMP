@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.tcgptrading.tcgptrading.core.data.TradingApi
@@ -65,11 +66,14 @@ import com.tcgptrading.tcgptrading.core.presentation.theme.TcgColors
 import com.tcgptrading.tcgptrading.core.util.offersText
 import com.tcgptrading.tcgptrading.core.util.playerLabel
 import com.tcgptrading.tcgptrading.core.util.timeAgo
+import com.tcgptrading.tcgptrading.features.trading.ReloadPolicy
+import com.tcgptrading.tcgptrading.features.trading.TradingSignals
 import com.tcgptrading.tcgptrading.main.presentation.LocalSnackbar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -102,7 +106,7 @@ sealed interface MyTradesEvent {
     data class Message(val text: String) : MyTradesEvent
 }
 
-class MyTradesViewModel(private val api: TradingApi) : ViewModel() {
+class MyTradesViewModel(private val api: TradingApi, private val signals: TradingSignals) : ViewModel() {
 
     private val _state = MutableStateFlow(MyTradesState())
     val state: StateFlow<MyTradesState> = _state.asStateFlow()
@@ -110,9 +114,19 @@ class MyTradesViewModel(private val api: TradingApi) : ViewModel() {
     private val _events = Channel<MyTradesEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    private val reload = ReloadPolicy()
+
     init {
         loadOffers()
         loadWants()
+        // An offer sent from Wanted shows up here at once
+        viewModelScope.launch { signals.offerSent.drop(1).collect { loadOffers() } }
+    }
+
+    /** Coming back to the screen: pick up offers accepted or declined meanwhile, without reloading on every switch. */
+    fun onResume() {
+        val s = _state.value
+        if (reload.shouldReloadOnResume(s.loadingOffers || s.loadingWants || s.refreshing)) refresh()
     }
 
     fun refresh() {
@@ -139,6 +153,7 @@ class MyTradesViewModel(private val api: TradingApi) : ViewModel() {
         runApi { api.myOffers(page = 0, size = 100) }
             .onSuccess { page ->
                 _state.update { it.copy(offers = page.content, loadingOffers = false, offersError = null) }
+                reload.loaded()
                 loadCardNames(page.content.map { it.cardId })
             }
             .onFailure { e -> _state.update { it.copy(loadingOffers = false, offersError = e.message) } }
@@ -169,6 +184,16 @@ class MyTradesViewModel(private val api: TradingApi) : ViewModel() {
                 _events.send(MyTradesEvent.Message("Offer withdrawn."))
             }
             .onFailure { _events.send(MyTradesEvent.Message(it.message ?: "Could not withdraw the offer.")) }
+    }
+
+    /** Takes a declined offer off my list; the server deletes it (it no longer counts on the want). */
+    fun remove(offer: Offer) = withBusy(offer.id) {
+        runApi { api.withdrawOffer(offer.id) }
+            .onSuccess {
+                _state.update { s -> s.copy(offers = s.offers.filterNot { it.id == offer.id }) }
+                _events.send(MyTradesEvent.Message("Removed."))
+            }
+            .onFailure { _events.send(MyTradesEvent.Message(it.message ?: "Could not remove the offer.")) }
     }
 
     fun removeWant(want: TradeRequest) = withBusy(want.requestId) {
@@ -238,7 +263,13 @@ fun MyTradesScreen(
     val snackbar = LocalSnackbar.current
     var tab by rememberSaveable(initialTab) { mutableStateOf(if (initialTab == "wants") "wants" else "offers") }
     var withdrawTarget by remember { mutableStateOf<Offer?>(null) }
+    var removeOfferTarget by remember { mutableStateOf<Offer?>(null) }
     var removeTarget by remember { mutableStateOf<TradeRequest?>(null) }
+
+    LifecycleResumeEffect(vm) {
+        vm.onResume()
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
@@ -286,6 +317,7 @@ fun MyTradesScreen(
                                 wantedName = state.cardNames[offer.cardId] ?: "Card",
                                 busy = offer.id in state.busy,
                                 onWithdraw = { withdrawTarget = offer },
+                                onRemove = { removeOfferTarget = offer },
                                 onOpenChat = { vm.openChatForOffer(offer) },
                             )
                         }
@@ -326,6 +358,18 @@ fun MyTradesScreen(
             danger = true,
             onConfirm = { withdrawTarget = null; vm.withdraw(offer) },
             onDismiss = { withdrawTarget = null },
+        )
+    }
+
+    removeOfferTarget?.let { offer ->
+        ConfirmDialog(
+            title = "Remove this declined offer from your list?",
+            message = "It was for ${state.cardNames[offer.cardId] ?: "a card"}. You can make a new offer on that want later.",
+            confirmText = "Remove",
+            dismissText = "Keep it",
+            danger = true,
+            onConfirm = { removeOfferTarget = null; vm.remove(offer) },
+            onDismiss = { removeOfferTarget = null },
         )
     }
 
@@ -413,6 +457,7 @@ private fun OfferRow(
     wantedName: String,
     busy: Boolean,
     onWithdraw: () -> Unit,
+    onRemove: () -> Unit,
     onOpenChat: () -> Unit,
 ) {
     val partner = playerLabel(offer.requesterFriendId)
@@ -449,7 +494,8 @@ private fun OfferRow(
                 val detail = when {
                     accepted && offer.acceptedCard != null -> "You give $wantedName to $partner and get ${offer.acceptedCard}."
                     accepted -> "$partner accepted your offer."
-                    declined -> "The collector chose another offer."
+                    // Declined outright, or they took another offer: either way no trade will happen
+                    declined -> "You offered it to $partner. They declined it."
                     else -> "You give it to $partner for one of the cards above. Sent ${timeAgo(offer.creationDate).lowercase()}."
                 }
                 Text(detail, style = MaterialTheme.typography.bodyMedium, color = TcgColors.Muted)
@@ -476,7 +522,12 @@ private fun OfferRow(
                     }
                     if (note != null) Text(note, style = MaterialTheme.typography.bodySmall, color = TcgColors.Muted)
                 }
-            } else if (!declined) {
+            } else if (declined) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    TcgButton("Remove", onRemove, style = TcgButtonStyle.Secondary, loading = busy)
+                    Text("No trade will happen", style = MaterialTheme.typography.bodySmall, color = TcgColors.Muted)
+                }
+            } else {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     TcgButton("Withdraw offer", onWithdraw, style = TcgButtonStyle.Secondary, loading = busy)
                     Text("Waiting for the collector", style = MaterialTheme.typography.bodySmall, color = TcgColors.Muted)

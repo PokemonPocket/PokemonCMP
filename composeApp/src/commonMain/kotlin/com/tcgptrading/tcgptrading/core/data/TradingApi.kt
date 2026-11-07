@@ -5,6 +5,11 @@ import com.tcgptrading.tcgptrading.core.data.model.ChatContact
 import com.tcgptrading.tcgptrading.core.data.model.ChatMessage
 import com.tcgptrading.tcgptrading.core.data.model.CollectionBulkUpdate
 import com.tcgptrading.tcgptrading.core.data.model.CollectionView
+import com.tcgptrading.tcgptrading.core.data.model.CardDemandPage
+import com.tcgptrading.tcgptrading.core.data.model.CardMarket
+import com.tcgptrading.tcgptrading.core.data.model.FeedPage
+import com.tcgptrading.tcgptrading.core.data.model.ForYou
+import com.tcgptrading.tcgptrading.core.data.model.WantedTraders
 import com.tcgptrading.tcgptrading.core.data.model.SetProgress
 import com.tcgptrading.tcgptrading.core.data.model.SpareMatches
 import com.tcgptrading.tcgptrading.core.data.model.Offer
@@ -31,6 +36,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLPathPart
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Every backend call the app makes, mirroring the website's services.
@@ -93,6 +101,46 @@ class TradingApi(private val client: HttpClient) {
         expansion?.let { parameter("expansion", it) }
         language?.let { parameter("language", it) }
     }.body()
+
+    /**
+     * Wanted › All wants, newest first. One player's wants from the same day come as one group.
+     * friendId shows one player's wants only; spareOnly keeps the cards I have spare.
+     */
+    suspend fun wantedFeed(
+        page: Int, size: Int = 24, cardName: String? = null,
+        rarity: String? = null, expansion: String? = null, language: String? = null,
+        friendId: String? = null, spareOnly: Boolean = false,
+    ): FeedPage = client.get("wanted/feed") {
+        parameter("page", page); parameter("size", size)
+        cardName?.takeIf { it.isNotBlank() }?.let { parameter("cardName", it) }
+        rarity?.let { parameter("rarity", it) }
+        expansion?.let { parameter("expansion", it) }
+        language?.let { parameter("language", it) }
+        friendId?.takeIf { it.isNotBlank() }?.let { parameter("userFriendId", it) }
+        if (spareOnly) parameter("spareOnly", true)
+    }.body()
+
+    /** Wanted › By card: one row per card. sort: "newest" (latest want first) or "popular". */
+    suspend fun wantedByCard(
+        page: Int, size: Int = 24, sort: String = "newest", cardName: String? = null,
+        rarity: String? = null, expansion: String? = null, language: String? = null, spareOnly: Boolean = false,
+    ): CardDemandPage = client.get("wanted/by-card") {
+        parameter("page", page); parameter("size", size); parameter("sort", sort)
+        cardName?.takeIf { it.isNotBlank() }?.let { parameter("cardName", it) }
+        rarity?.let { parameter("rarity", it) }
+        expansion?.let { parameter("expansion", it) }
+        language?.let { parameter("language", it) }
+        if (spareOnly) parameter("spareOnly", true)
+    }.body()
+
+    /** Wanted › For you: wants I can fill with my spares, two-way swaps first. */
+    suspend fun wantedForYou(): ForYou = client.get("wanted/for-you").body()
+
+    /** Wanted › Traders: players who want my spares, newest want first. */
+    suspend fun wantedTraders(): WantedTraders = client.get("wanted/traders").body()
+
+    /** Who wants one card, newest first, with what each player could give me back. */
+    suspend fun cardMarket(cardId: String): CardMarket = client.get("cards/id/${cardId.encodeURLPathPart()}/market").body()
 
     /** My wants. status: "all", "open" or "accepted". */
     suspend fun myWants(page: Int, size: Int = 50, cardName: String = "all", status: String = "all"): PageDto<TradeRequest> =
@@ -218,18 +266,45 @@ suspend fun <T> runApi(block: suspend () -> T): Result<T> = try {
 } catch (e: CancellationException) {
     throw e
 } catch (e: ClientRequestException) {
+    val server = serverMessageOf(e)
     val message = when (e.response.status) {
         HttpStatusCode.Unauthorized -> "Please sign in again."
         HttpStatusCode.Forbidden -> "You can't do that."
         HttpStatusCode.NotFound -> "It no longer exists."
-        HttpStatusCode.Conflict -> "This changed in the meantime. Refresh and try again."
+        // The server says what changed ("You already made an offer on this want", "Request was already traded")
+        HttpStatusCode.Conflict -> server ?: "This changed in the meantime. Refresh and try again."
+        // 400 explains what was wrong with the request ("Offered card doesn't match the want")
+        HttpStatusCode.BadRequest -> server ?: "Something went wrong. Try again."
         else -> "Something went wrong. Try again."
     }
-    Result.failure(ApiException(message, e))
+    Result.failure(ApiException(message, e, server))
 } catch (e: ResponseException) {
     Result.failure(ApiException("The server had a problem. Try again in a moment.", e))
 } catch (e: Exception) {
     Result.failure(ApiException("Can't reach TCGP Trading. Check your connection.", e))
 }
 
-class ApiException(message: String, cause: Throwable? = null) : Exception(message, cause)
+/** The `message` of the server's JSON error body as a sentence, or null when it sent none. */
+private suspend fun serverMessageOf(e: ResponseException): String? = try {
+    val body = e.response.bodyAsText()
+    val text = ((Json.parseToJsonElement(body) as? JsonObject)?.get("message") as? JsonPrimitive)
+        ?.takeIf { it.isString }?.content?.trim()
+    when {
+        text.isNullOrEmpty() -> null
+        text.last().isLetterOrDigit() -> "$text."
+        else -> text
+    }
+} catch (c: CancellationException) {
+    throw c
+} catch (_: Exception) {
+    null
+}
+
+/** serverMessage: what the server said, when its error body had a message. */
+class ApiException(message: String, cause: Throwable? = null, val serverMessage: String? = null) : Exception(message, cause)
+
+/** True when the server answered 409 Conflict, e.g. an offer already made on this want. */
+fun Throwable.isConflict(): Boolean = (cause as? ClientRequestException)?.response?.status == HttpStatusCode.Conflict
+
+/** The server's own message for this failure, if it sent one. */
+val Throwable.serverMessage: String? get() = (this as? ApiException)?.serverMessage

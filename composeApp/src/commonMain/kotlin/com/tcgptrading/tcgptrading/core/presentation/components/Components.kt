@@ -86,11 +86,13 @@ fun TcgButton(
     enabled: Boolean = true,
     loading: Boolean = false,
     large: Boolean = false,
+    /** Shown instead of [text] while [loading], e.g. "Sending…". */
+    loadingText: String = "Please wait…",
 ) {
     val height = if (large) 52.dp else 46.dp
     val shape = RoundedCornerShape(if (large) 14.dp else 12.dp)
     val content: @Composable () -> Unit = {
-        Text(text = if (loading) "Please wait…" else text, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = if (loading) loadingText else text, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
     val mod = modifier.heightIn(min = height)
     when (style) {
